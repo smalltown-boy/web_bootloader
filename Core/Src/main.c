@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 #include "W5500/w5500.h"
 #include "socket.h"
+#include "httpServer.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -51,6 +52,74 @@ wiz_NetInfo gSetNetInfo = {
 	    .dhcp = NETINFO_STATIC };
 
 uint8_t buffer_size_tx_rx[16] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
+
+uint8_t http_rx_buff[2048];
+uint8_t http_tx_buff[2048];
+uint8_t socknumlist[] = {0,1,2};
+
+const uint8_t webpage[] = {
+    "<!DOCTYPE html>\n"
+    "<html lang=\"en\">\n"
+    "<head>\n"
+    "    <meta charset=\"UTF-8\">\n"
+    "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+    "    <title>Example APP</title>\n"
+    "    <style>\n"
+    "        body {\n"
+    "            font-family: Arial, sans-serif;\n"
+    "            text-align: center;\n"
+    "            padding: 50px;\n"
+    "            background-color: #f4f4f4;\n"
+    "        }\n"
+    "        h1 {\n"
+    "            font-size: 24px;\n"
+    "            margin: 0;\n"
+    "        }\n"
+    "        h2 {\n"
+    "            margin: 10px 0 30px;\n"
+    "        }\n"
+    "        .button-container {\n"
+    "            margin: 20px 0;\n"
+    "        }\n"
+    "        .input-container {\n"
+    "            margin: 20px 0;\n"
+    "        }\n"
+    "        .file-input {\n"
+    "            margin: 10px 0;\n"
+    "        }\n"
+    "        button {\n"
+    "            display: block;\n"
+    "            margin: 10px auto;\n"
+    "        }\n"
+    "    </style>\n"
+    "</head>\n"
+    "<body>\n"
+    "    <h1>Example APP</h1>\n"
+    "    <h2>Welcome to bootloader</h2>\n"
+    "    <div class=\"input-container\">\n"
+    "        <input type=\"file\" class=\"file-input\">\n"
+    "    </div>\n"
+    "    <div class=\"button-container\">\n"
+    "        <button type=\"button\">Load firmware</button>\n"
+    "        <button id=\"exit-button\" type=\"button\">Exit from bootloader</button>\n"
+    "    </div>\n"
+    "    <script>\n"
+    "        document.getElementById('exit-button').addEventListener('click', function() {\n"
+    "            fetch('/exit', {\n"
+    "                method: 'POST'\n"
+    "            })\n"
+    "            .then(response => {\n"
+    "                if (response.ok) {\n"
+    "                    console.log('Command execute');\n"
+    "                } else {\n"
+    "                    console.error('Error');\n"
+    "                }\n"
+    "            });\n"
+    "        });\n"
+    "    </script>\n"
+    "</body>\n"
+    "</html>"
+};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -119,6 +188,11 @@ int main(void)
 
   socket(0,Sn_MR_TCP,5555,SF_TCP_NODELAY | SF_IO_NONBLOCK);
 
+  httpServer_init(http_tx_buff,http_rx_buff,5,socknumlist);
+  reg_httpServer_cbfunc(NULL, NULL);
+  reg_httpServer_webContent((uint8_t*)"index.html", (uint8_t*)webpage);
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -128,6 +202,10 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  for(uint16_t i = 0; i < sizeof(socknumlist); i++)
+	  {
+	  	httpServer_run(i);
+	  }
   }
   /* USER CODE END 3 */
 }
