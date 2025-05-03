@@ -215,6 +215,18 @@ int main(void)
 	  else
 	  {
 	  	//В противном случае переходим к коду основной программы
+		if(((*(uint32_t)APPLICATION_ADDRESS) & 0x2FFE0000) == 0x20020000)
+		{
+			jump_addr = *(uint32_t *)(APPLICATION_ADDRESS + 4);
+			jump_to_app = (pFunction)jump_addr;
+			__set_MSP(*(uint32_t *)APPLICATION_ADDRESS);
+			jump_to_app();
+		}
+		else
+		{
+			//Здесь можно разместить код, который будет выполняться, если переход
+			//к основному приложению не был осуществлён корректно
+		}
 	  }
   }
   /* USER CODE END 3 */
