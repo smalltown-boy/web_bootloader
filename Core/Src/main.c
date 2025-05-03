@@ -33,7 +33,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define APPLICATION_ADDRESS 0x8040000
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -120,6 +120,12 @@ const uint8_t webpage[] = {
     "</body>\n"
     "</html>"
 };
+
+uint8_t recv_data_buf[64];
+
+typedef void (*pFunction)(void);
+uint32_t jump_addr;
+pFunction jump_to_app;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -202,9 +208,13 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  for(uint16_t i = 0; i < sizeof(socknumlist); i++)
+	  if(HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_5) == GPIO_PIN_RESET) //Если перемычка установлена
 	  {
-	  	httpServer_run(i);
+	  	//Выполняем основной код загрузчика
+	  }
+	  else
+	  {
+	  	//В противном случае переходим к коду основной программы
 	  }
   }
   /* USER CODE END 3 */
