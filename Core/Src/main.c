@@ -208,14 +208,15 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  if(HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_5) == GPIO_PIN_RESET) //Если перемычка установлена
+	  if(HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_5) != GPIO_PIN_RESET) //Если перемычка установлена
 	  {
 	  	//Выполняем основной код загрузчика
+		  asm("nop");
 	  }
 	  else
 	  {
 	  	//В противном случае переходим к коду основной программы
-		if(((*(uint32_t)APPLICATION_ADDRESS) & 0x2FFE0000) == 0x20020000)
+		if(((*(uint32_t*)APPLICATION_ADDRESS) & 0x2FFE0000) == 0x20020000)
 		{
 			jump_addr = *(uint32_t *)(APPLICATION_ADDRESS + 4);
 			jump_to_app = (pFunction)jump_addr;
@@ -226,6 +227,7 @@ int main(void)
 		{
 			//Здесь можно разместить код, который будет выполняться, если переход
 			//к основному приложению не был осуществлён корректно
+			asm("nop");
 		}
 	  }
   }
